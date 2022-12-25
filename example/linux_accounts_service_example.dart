@@ -9,5 +9,9 @@ Future<void> main() async {
   for (var id in userIds ?? []) {
     print(id);
   }
+  for (var fu in service.freeDesktopUsers.entries) {
+    print(await fu.value.getUserName());
+  }
+
   await service.dispose();
 }

@@ -1,6 +1,7 @@
 import 'dart:async';
 
 import 'package:dbus/dbus.dart';
+import 'package:linux_accounts_service/src/gen_user.dart';
 
 class LinuxAccountsService {
   final DBusRemoteObject _object;
@@ -12,6 +13,12 @@ class LinuxAccountsService {
         DBusClient.system(),
         name: 'org.freedesktop.Accounts',
         path: DBusObjectPath('/org/freedesktop/Accounts'),
+      );
+
+  static FreeDesktopUser _createUserObject(String path) => FreeDesktopUser(
+        DBusClient.system(),
+        'org.freedesktop.Accounts.User',
+        path: DBusObjectPath(path),
       );
 
   Future<void> init() async {
@@ -48,14 +55,24 @@ class LinuxAccountsService {
   }
 
   List<String>? users;
-  final _userController = StreamController<List<String>>.broadcast();
-  Stream<List<String>> get usersStream => _userController.stream;
-  Future<void> _initUsers() async =>
-      users = await _object.callListCachedUsers();
+  final _userController = StreamController<bool>.broadcast();
+  Stream<bool> get usersChanged => _userController.stream;
+  Future<void> _initUsers() async {
+    users = await _object.callListCachedUsers();
+    for (var user in users ?? []) {
+      freeDesktopUsers.putIfAbsent(user, () => _createUserObject(user));
+    }
+  }
+
   void _updateUsers(List<String> value) {
     users = value;
-    _userController.add(value);
+    for (var user in users ?? []) {
+      freeDesktopUsers.putIfAbsent(user, () => _createUserObject(user));
+    }
+    _userController.add(true);
   }
+
+  Map<String, FreeDesktopUser> freeDesktopUsers = {};
 
   Future<String> getDaemonVersion() async => _object.getDaemonVersion();
   String? lastDaemonVersion;
