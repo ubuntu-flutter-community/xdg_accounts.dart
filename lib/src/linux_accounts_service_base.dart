@@ -4,7 +4,6 @@ import 'package:dbus/dbus.dart';
 
 class LinuxAccountsService {
   final DBusRemoteObject _object;
-  final List<DBusRemoteObject> _userObjects = [];
   StreamSubscription<DBusPropertiesChangedSignal>? _propertyListener;
 
   LinuxAccountsService() : _object = _createObject();
@@ -15,14 +14,12 @@ class LinuxAccountsService {
         path: DBusObjectPath('/org/freedesktop/Accounts'),
       );
 
-  static DBusRemoteObject _createUserObject(String path) => DBusRemoteObject(
-        DBusClient.system(),
-        name: 'org.freedesktop.Accounts',
-        path: DBusObjectPath(path),
-      );
-
   Future<void> init() async {
-    // init all stuff
+    await _initDaemonVersion();
+    await _initUsers();
+    await _initAutomaticLoginUsers();
+    await _initHasNoUsers();
+    await _initHasMultipleUsers();
     _propertyListener ??= _object.propertiesChanged.listen(_updateProperties);
   }
 
@@ -33,44 +30,103 @@ class LinuxAccountsService {
   }
 
   void _updateProperties(DBusPropertiesChangedSignal signal) {
-    if (signal.userAdded) {
+    if (signal.userAdded || signal.userDeleted) {
       _object.callListCachedUsers().then(_updateUsers);
     }
-  }
-
-  void _updateUsers(List<String> value) {
-    if (value.isEmpty) return;
-    // _userExtensionsEnabled = value;
-    // if (!_userExtensionsEnabledController.isClosed) {
-    //   _userExtensionsEnabledController.add(_userExtensionsEnabled);
-    // }
-  }
-
-  Future<List<int>> listCachedUserIds() async {
-    final idStrings = await _object.callListCachedUsers();
-    final ids = <int>[];
-    for (var element in idStrings) {
-      final idString = element.replaceAll('/org/freedesktop/Accounts/User', '');
-      final parsedInt = int.parse(idString);
-      ids.add(parsedInt);
+    if (signal.daemonVersionChanged) {
+      _object.getDaemonVersion().then(_updateDaemonVersion);
     }
-    return ids;
+    if (signal.automaticLoginUsersChanged) {
+      _object.getAutomaticLoginUsers().then(_updateAutomaticLoginUsers);
+    }
+    if (signal.hasNoUsersChanged) {
+      _object.getHasNoUsers().then(_updateHasNoUsers);
+    }
+    if (signal.hasMultipleUsersChanged) {
+      _object.getHasMultipleUsers().then(_updateHasMultipleUsers);
+    }
   }
 
-  Future<List<String>> listCachedUserPaths() async =>
-      await _object.callListCachedUsers();
+  List<String>? users;
+  final _userController = StreamController<List<String>>.broadcast();
+  Stream<List<String>> get usersStream => _userController.stream;
+  Future<void> _initUsers() async =>
+      users = await _object.callListCachedUsers();
+  void _updateUsers(List<String> value) {
+    users = value;
+    _userController.add(value);
+  }
 
-  Future<String> findUserById(int id) async => _object.callFindUserById(id);
+  Future<String> getDaemonVersion() async => _object.getDaemonVersion();
+  String? lastDaemonVersion;
+  final _daemonVersionController = StreamController<String>.broadcast();
+  Stream<String> get daemonVersion => _daemonVersionController.stream;
+  Future<void> _initDaemonVersion() async =>
+      lastDaemonVersion = await getDaemonVersion();
+  void _updateDaemonVersion(String value) {
+    lastDaemonVersion = value;
+    _daemonVersionController.add(value);
+  }
 
-  Future<String> findUserByName(String name) async =>
+  List<String>? automaticLoginUsers;
+  final _automaticLoginUsersController =
+      StreamController<List<String>>.broadcast();
+  Stream<List<String>> get automaticLoginUsersStream =>
+      _automaticLoginUsersController.stream;
+  Future<void> _initAutomaticLoginUsers() async =>
+      automaticLoginUsers = await _object.getAutomaticLoginUsers();
+  void _updateAutomaticLoginUsers(List<String> value) {
+    automaticLoginUsers = value;
+    _automaticLoginUsersController.add(value);
+  }
+
+  // HasNoUsers
+  bool? hasNoUsers;
+  final _hasNoUsersController = StreamController<bool>.broadcast();
+  Stream<bool> get hasNoUsersStream => _hasNoUsersController.stream;
+  Future<void> _initHasNoUsers() async =>
+      hasNoUsers = await _object.getHasNoUsers();
+  void _updateHasNoUsers(bool value) {
+    hasNoUsers = value;
+    _hasNoUsersController.add(value);
+  }
+
+  // HasMultipleUsers
+  bool? hasMultipleUsers;
+  final _hasMultipleUsersController = StreamController<bool>.broadcast();
+  Stream<bool> get hasMultipleUsersStream => _hasMultipleUsersController.stream;
+  Future<void> _initHasMultipleUsers() async =>
+      hasMultipleUsers = await _object.getHasMultipleUsers();
+  void _updateHasMultipleUsers(bool value) {
+    hasMultipleUsers = value;
+    _hasMultipleUsersController.add(value);
+  }
+
+  Future<String> findUserById({
+    required int id,
+  }) async =>
+      _object.callFindUserById(id);
+
+  Future<String> findUserByName({
+    required String name,
+  }) async =>
       _object.callFindUserByName(name);
 
-  void createUser({
+  Future<void> createUser({
     required String name,
     required String fullname,
     required int accountType,
-  }) =>
-      _object.callCreateUser(name, fullname, accountType);
+  }) async =>
+      await _object.callCreateUser(name, fullname, accountType);
+
+  Future<String> cacheUser({required String name}) async =>
+      _object.callCacheUser(name);
+
+  Future<void> unCacheUser({required String name}) async =>
+      _object.callUncacheUser(name);
+
+  Future<void> deleteUser({required int id, required bool removeFiles}) async =>
+      _object.callDeleteUser(id, removeFiles);
 }
 
 extension _AccountsRemoteObject on DBusRemoteObject {
@@ -244,4 +300,15 @@ extension _ChangedAccounts on DBusPropertiesChangedSignal {
   bool get userAdded => changedProperties.containsKey('UserAdded');
 
   bool get userDeleted => changedProperties.containsKey('UserDeleted');
+
+  bool get daemonVersionChanged =>
+      changedProperties.containsKey('DaemonVersion');
+
+  bool get automaticLoginUsersChanged =>
+      changedProperties.containsKey('AutomaticLoginUsers');
+
+  bool get hasNoUsersChanged => changedProperties.containsKey('HasNoUsers');
+
+  bool get hasMultipleUsersChanged =>
+      changedProperties.containsKey('HasMultipleUsers');
 }
