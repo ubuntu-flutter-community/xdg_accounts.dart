@@ -70,12 +70,15 @@ class LinuxAccountsService {
   Stream<bool> get usersChanged => _userController.stream;
   Future<void> _initUsers() async {
     _users = await _object.callListCachedUsers();
-    _putAbsentFreeDesktopUsers(_users);
+    if (_users != null) {
+      _putNewUsers(_users!);
+    }
   }
 
   void _updateUsers(List<String> value) {
     _users = value;
-    _putAbsentFreeDesktopUsers(_users);
+    _putNewUsers(value);
+    _removeOutdatedUsers(value);
     _userController.add(true);
   }
 
@@ -159,15 +162,25 @@ class LinuxAccountsService {
       _object.callDeleteUser(id, removeFiles);
 
   // Helper methods
-
-  void _putAbsentFreeDesktopUsers(List<String>? users) {
-    for (var user in users ?? <String>[]) {
+  void _putNewUsers(List<String> users) {
+    for (var user in users) {
       _freeDesktopUsers.putIfAbsent(
-        user.replaceAll('$_kAccountsPath/User', ''),
+        _userIdFromPath(user),
         () => _createUserObject(user),
       );
     }
   }
+
+  void _removeOutdatedUsers(List<String> users) {
+    if (users.length < _freeDesktopUsers.length) {
+      for (var fu in _freeDesktopUsers.entries) {
+        // TODO
+      }
+    }
+  }
+
+  String _userIdFromPath(String user) =>
+      user.replaceAll('$_kAccountsPath/User', '');
 }
 
 extension _AccountsRemoteObject on DBusRemoteObject {
