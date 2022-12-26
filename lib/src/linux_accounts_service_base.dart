@@ -3,22 +3,29 @@ import 'dart:async';
 import 'package:dbus/dbus.dart';
 import 'package:linux_accounts_service/src/freedesktop_user.dart';
 
+const _kAccountsInterface = 'org.freedesktop.Accounts';
+const _kAccountsPath = '/org/freedesktop/Accounts';
+
 class LinuxAccountsService {
+  LinuxAccountsService() : _object = _createObject();
+
   final DBusRemoteObject _object;
   StreamSubscription<DBusPropertiesChangedSignal>? _propertyListener;
 
-  LinuxAccountsService() : _object = _createObject();
-  Map<String, FreeDesktopUser> freeDesktopUsers = {};
+  /// User IDs mapped to the [FreeDesktopUser]
+  final Map<String, FreeDesktopUser> _freeDesktopUsers = {};
+  List<FreeDesktopUser> get freeDesktopUsers =>
+      _freeDesktopUsers.entries.map((e) => e.value).toList();
 
   static DBusRemoteObject _createObject() => DBusRemoteObject(
         DBusClient.system(),
-        name: 'org.freedesktop.Accounts',
-        path: DBusObjectPath('/org/freedesktop/Accounts'),
+        name: _kAccountsInterface,
+        path: DBusObjectPath(_kAccountsPath),
       );
 
   static FreeDesktopUser _createUserObject(String path) => FreeDesktopUser(
         DBusClient.system(),
-        'org.freedesktop.Accounts',
+        _kAccountsInterface,
         path: DBusObjectPath(path),
       );
 
@@ -32,7 +39,7 @@ class LinuxAccountsService {
   }
 
   Future<void> dispose() async {
-    for (var fu in freeDesktopUsers.entries) {
+    for (var fu in _freeDesktopUsers.entries) {
       await fu.value.dispose();
     }
     await _propertyListener?.cancel();
@@ -63,17 +70,21 @@ class LinuxAccountsService {
   Stream<bool> get usersChanged => _userController.stream;
   Future<void> _initUsers() async {
     _users = await _object.callListCachedUsers();
-    for (var user in _users ?? []) {
-      freeDesktopUsers.putIfAbsent(user, () => _createUserObject(user));
-    }
+    _putAbsentFreeDesktopUsers(_users);
   }
 
   void _updateUsers(List<String> value) {
     _users = value;
-    for (var user in _users ?? []) {
-      freeDesktopUsers.putIfAbsent(user, () => _createUserObject(user));
-    }
+    _putAbsentFreeDesktopUsers(_users);
     _userController.add(true);
+  }
+
+  Future<void> changeUserName({
+    required String uid,
+    required String newUserName,
+  }) async {
+    await _freeDesktopUsers[uid]
+        ?.callSetUserName(newUserName, allowInteractiveAuthorization: true);
   }
 
   Future<String> getDaemonVersion() async => _object.getDaemonVersion();
@@ -146,6 +157,17 @@ class LinuxAccountsService {
 
   Future<void> deleteUser({required int id, required bool removeFiles}) async =>
       _object.callDeleteUser(id, removeFiles);
+
+  // Helper methods
+
+  void _putAbsentFreeDesktopUsers(List<String>? users) {
+    for (var user in users ?? <String>[]) {
+      _freeDesktopUsers.putIfAbsent(
+        user.replaceAll('$_kAccountsPath/User', ''),
+        () => _createUserObject(user),
+      );
+    }
+  }
 }
 
 extension _AccountsRemoteObject on DBusRemoteObject {

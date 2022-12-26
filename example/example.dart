@@ -5,14 +5,23 @@ import 'package:linux_accounts_service/linux_accounts_service.dart';
 Future<void> main() async {
   final service = LinuxAccountsService();
   await service.init();
-  for (var fu in service.freeDesktopUsers.entries) {
-    var username = await fu.value.getUserName();
-    var freeDesktopAccountType = await fu.value.getAccountType();
-    var uid = await fu.value.getUid();
+
+  await printAllUsers(service);
+
+  // Change to an existing uid
+  // await service.changeUserName(uid: '1001', newUserName: 'anewname');
+  // await printAllUsers(service);
+
+  await service.dispose();
+}
+
+Future<void> printAllUsers(LinuxAccountsService service) async {
+  for (var fu in service.freeDesktopUsers) {
+    var username = await fu.getUserName();
+    var freeDesktopAccountType = await fu.getAccountType();
+    var uid = await fu.getUid();
     print(
       '$username (UID: $uid, Type: ${freeDesktopAccountType.name})',
     );
   }
-
-  await service.dispose();
 }
