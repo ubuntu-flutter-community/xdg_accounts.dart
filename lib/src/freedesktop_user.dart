@@ -1,7 +1,9 @@
-// This file was generated using the following command and may be overwritten.
-// dart-dbus generate-remote-object /usr/share/dbus-1/interfaces/org.freedesktop.Accounts.User.xml
-
 import 'package:dbus/dbus.dart';
+
+enum FreeDesktopAccountType {
+  user,
+  admin;
+}
 
 /// Signal data for org.freedesktop.Accounts.User.Changed.
 class FreeDesktopUserChanged extends DBusSignal {
@@ -30,6 +32,10 @@ class FreeDesktopUser extends DBusRemoteObject {
       name: 'Changed',
       signature: DBusSignature(''),
     ).asBroadcastStream().map((signal) => FreeDesktopUserChanged(signal));
+  }
+
+  Future<void> dispose() async {
+    await client.close();
   }
 
   /// Gets org.freedesktop.Accounts.User.Uid
@@ -63,13 +69,15 @@ class FreeDesktopUser extends DBusRemoteObject {
   }
 
   /// Gets org.freedesktop.Accounts.User.AccountType
-  Future<int> getAccountType() async {
+  Future<FreeDesktopAccountType> getAccountType() async {
     var value = await getProperty(
       'org.freedesktop.Accounts.User',
       'AccountType',
       signature: DBusSignature('i'),
     );
-    return value.asInt32();
+    return value.asInt32() == 0
+        ? FreeDesktopAccountType.user
+        : FreeDesktopAccountType.admin;
   }
 
   /// Gets org.freedesktop.Accounts.User.HomeDirectory
