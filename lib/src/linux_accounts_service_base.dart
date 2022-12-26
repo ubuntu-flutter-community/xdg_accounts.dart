@@ -31,7 +31,7 @@ class LinuxAccountsService {
 
   Future<void> init() async {
     await _initDaemonVersion();
-    await _initUsers();
+    await _initUserPaths();
     await _initAutomaticLoginUsers();
     await _initHasNoUsers();
     await _initHasMultipleUsers();
@@ -49,7 +49,7 @@ class LinuxAccountsService {
 
   void _updateProperties(DBusPropertiesChangedSignal signal) {
     if (signal.userAdded || signal.userDeleted) {
-      _object.callListCachedUsers().then(_updateUsers);
+      _object.callListCachedUsers().then(_updateUserPaths);
     }
     if (signal.daemonVersionChanged) {
       _object.getDaemonVersion().then(_updateDaemonVersion);
@@ -65,21 +65,21 @@ class LinuxAccountsService {
     }
   }
 
-  List<String>? _users;
-  final _userController = StreamController<bool>.broadcast();
-  Stream<bool> get usersChanged => _userController.stream;
-  Future<void> _initUsers() async {
-    _users = await _object.callListCachedUsers();
-    if (_users != null) {
-      _putNewUsers(_users!);
+  List<String>? _userPaths;
+  final _usersController = StreamController<bool>.broadcast();
+  Stream<bool> get usersChanged => _usersController.stream;
+  Future<void> _initUserPaths() async {
+    _userPaths = await _object.callListCachedUsers();
+    if (_userPaths != null) {
+      _putNewUsers(_userPaths!);
     }
   }
 
-  void _updateUsers(List<String> value) {
-    _users = value;
+  void _updateUserPaths(List<String> value) {
+    _userPaths = value;
     _putNewUsers(value);
     _removeOutdatedUsers(value);
-    _userController.add(true);
+    _usersController.add(true);
   }
 
   Future<void> changeUserName({
@@ -162,19 +162,28 @@ class LinuxAccountsService {
       _object.callDeleteUser(id, removeFiles);
 
   // Helper methods
-  void _putNewUsers(List<String> users) {
-    for (var user in users) {
+  void _putNewUsers(List<String> userPaths) {
+    for (var path in userPaths) {
       _freeDesktopUsers.putIfAbsent(
-        _userIdFromPath(user),
-        () => _createUserObject(user),
+        _userIdFromPath(path),
+        () => _createUserObject(path),
       );
     }
   }
 
-  void _removeOutdatedUsers(List<String> users) {
-    if (users.length < _freeDesktopUsers.length) {
+  void _removeOutdatedUsers(List<String> userPaths) {
+    if (userPaths.length < _freeDesktopUsers.length) {
+      final outDatedUsers = userPaths;
       for (var fu in _freeDesktopUsers.entries) {
-        // TODO
+        for (var user in userPaths) {
+          if (fu.key == _userIdFromPath(user)) {
+            outDatedUsers.remove(user);
+            break;
+          }
+        }
+      }
+      for (var oU in outDatedUsers) {
+        _freeDesktopUsers.remove(_userIdFromPath(oU));
       }
     }
   }
