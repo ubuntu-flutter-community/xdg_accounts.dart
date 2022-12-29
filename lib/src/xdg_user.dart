@@ -29,7 +29,7 @@ class XdgUser extends DBusRemoteObject {
   Stream<String> get userNameChanged => _userNameChangedController.stream;
   String? _userName;
   String? get userName => _userName;
-  set userName(String? value) {
+  void _updateUserName(String? value) {
     if (value == null) return;
     _userName = value;
     _userNameChangedController.add(value);
@@ -40,7 +40,7 @@ class XdgUser extends DBusRemoteObject {
   Stream<String> get realNameChanged => _realNameChangedController.stream;
   String? _realName;
   String? get realName => _realName;
-  set realName(String? value) {
+  void _updateRealName(String? value) {
     if (value == null) return;
     _realName = value;
     _realNameChangedController.add(value);
@@ -53,7 +53,7 @@ class XdgUser extends DBusRemoteObject {
       _accountTypeChangedController.stream;
   XdgAccountType? _accountType;
   XdgAccountType? get accountType => _accountType;
-  set accountType(XdgAccountType? value) {
+  void _updateAccountType(XdgAccountType? value) {
     if (value == null) return;
     _accountType = value;
     _accountTypeChangedController.add(value);
@@ -64,7 +64,7 @@ class XdgUser extends DBusRemoteObject {
   Stream<String> get homeDirChanged => _homeDirChangedController.stream;
   String? _homeDir;
   String? get homeDir => _homeDir;
-  set homeDir(String? value) {
+  void _updateHomeDir(String? value) {
     if (value == null) return;
     _homeDir = value;
     _homeDirChangedController.add(value);
@@ -75,7 +75,7 @@ class XdgUser extends DBusRemoteObject {
   Stream<String> get shellChanged => _shellChangedController.stream;
   String? _shell;
   String? get shell => _shell;
-  set shell(String? value) {
+  void _updateShell(String? value) {
     if (value == null) return;
     _shell = value;
     _shellChangedController.add(value);
@@ -86,7 +86,7 @@ class XdgUser extends DBusRemoteObject {
   Stream<String> get emailChanged => _emailChangedController.stream;
   String? _email;
   String? get email => _email;
-  set email(String? value) {
+  void _updateEmail(String? value) {
     if (value == null) return;
     _email = value;
     _emailChangedController.add(value);
@@ -97,7 +97,7 @@ class XdgUser extends DBusRemoteObject {
   Stream<String> get languageChanged => _languageChangedController.stream;
   String? _language;
   String? get language => _language;
-  set language(String? value) {
+  void _updateLanguage(String? value) {
     if (value == null) return;
     _language = value;
     _languageChangedController.add(value);
@@ -117,25 +117,25 @@ class XdgUser extends DBusRemoteObject {
 
   Future<void> _updateProperties(DBusPropertiesChangedSignal signal) async {
     if (signal.userNameChanged) {
-      userName = await getUserName();
+      _updateUserName(await getUserName());
     }
     if (signal.realNameChanged) {
-      realName = await getRealName();
+      _updateRealName(await getRealName());
     }
     if (signal.accountTypeChanged) {
-      accountType = await getAccountType();
+      _updateAccountType(await getAccountType());
     }
     if (signal.homeDirChanged) {
-      homeDir = await getHomeDirectory();
+      _updateHomeDir(await getHomeDirectory());
     }
     if (signal.shellChanged) {
-      shell = await getShell();
+      _updateShell(await getShell());
     }
     if (signal.emailChanged) {
-      email = await getEmail();
+      _updateEmail(await getEmail());
     }
     if (signal.languageChanged) {
-      language = await getLanguage();
+      _updateLanguage(await getLanguage());
     }
   }
 
