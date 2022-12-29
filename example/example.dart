@@ -2,11 +2,11 @@
 
 import 'dart:async';
 
-import 'package:linux_accounts_service/linux_accounts_service.dart';
+import 'package:linux_accounts_service/xdg_accounts.dart';
 import 'package:linux_accounts_service/src/xdg_user.dart';
 
 Future<void> main() async {
-  final service = LinuxAccountsService();
+  final service = XdgAccounts();
   await service.init();
 
   await printAllUsers(service.xdgUsers);

@@ -6,8 +6,8 @@ import 'package:linux_accounts_service/src/xdg_user.dart';
 const _kAccountsInterface = 'org.freedesktop.Accounts';
 const _kAccountsPath = '/org/freedesktop/Accounts';
 
-class LinuxAccountsService {
-  LinuxAccountsService() : _object = _createObject();
+class XdgAccounts {
+  XdgAccounts() : _object = _createObject();
 
   final DBusRemoteObject _object;
   StreamSubscription<DBusPropertiesChangedSignal>? _propertyListener;
