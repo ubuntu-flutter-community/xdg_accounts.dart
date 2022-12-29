@@ -95,7 +95,7 @@ class LinuxAccountsService {
     required String newUserName,
   }) async {
     await _xdgUsers[uid]
-        ?.callSetUserName(newUserName, allowInteractiveAuthorization: true);
+        ?.setUserName(newUserName, allowInteractiveAuthorization: true);
   }
 
   Future<String> getDaemonVersion() async => _object.getDaemonVersion();

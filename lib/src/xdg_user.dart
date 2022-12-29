@@ -436,7 +436,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetUserName()
-  Future<void> callSetUserName(
+  Future<void> setUserName(
     String name, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -452,7 +452,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetRealName()
-  Future<void> callSetRealName(
+  Future<void> setRealName(
     String name, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -468,7 +468,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetEmail()
-  Future<void> callSetEmail(
+  Future<void> setEmail(
     String email, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -484,7 +484,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetLanguage()
-  Future<void> callSetLanguage(
+  Future<void> setLanguage(
     String language, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -500,7 +500,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetFormatsLocale()
-  Future<void> callSetFormatsLocale(
+  Future<void> setFormatsLocale(
     String formatsLocale, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -516,7 +516,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetInputSources()
-  Future<void> callSetInputSources(
+  Future<void> setInputSources(
     List<Map<String, String>> sources, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -545,7 +545,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetXSession()
-  Future<void> callSetXSession(
+  Future<void> setXSession(
     String xSession, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -561,7 +561,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetSession()
-  Future<void> callSetSession(
+  Future<void> setSession(
     String session, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -577,7 +577,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetSessionType()
-  Future<void> callSetSessionType(
+  Future<void> setSessionType(
     String sessionType, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -593,7 +593,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetLocation()
-  Future<void> callSetLocation(
+  Future<void> setLocation(
     String location, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -609,7 +609,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetHomeDirectory()
-  Future<void> callSetHomeDirectory(
+  Future<void> setHomeDirectory(
     String homedir, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -625,7 +625,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetShell()
-  Future<void> callSetShell(
+  Future<void> setShell(
     String shell, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -641,7 +641,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetXHasMessages()
-  Future<void> callSetXHasMessages(
+  Future<void> setXHasMessages(
     bool hasMessages, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -657,7 +657,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetXKeyboardLayouts()
-  Future<void> callSetXKeyboardLayouts(
+  Future<void> setXKeyboardLayouts(
     List<String> layouts, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -673,7 +673,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetBackgroundFile()
-  Future<void> callSetBackgroundFile(
+  Future<void> setBackgroundFile(
     String filename, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -689,7 +689,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetIconFile()
-  Future<void> callSetIconFile(
+  Future<void> setIconFile(
     String filename, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -705,7 +705,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetLocked()
-  Future<void> callSetLocked(
+  Future<void> setLocked(
     bool locked, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -721,7 +721,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetAccountType()
-  Future<void> callSetAccountType(
+  Future<void> setAccountType(
     int accountType, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -737,7 +737,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetPasswordMode()
-  Future<void> callSetPasswordMode(
+  Future<void> setPasswordMode(
     int mode, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -753,7 +753,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetPassword()
-  Future<void> callSetPassword(
+  Future<void> setPassword(
     String password,
     String hint, {
     bool noAutoStart = false,
@@ -770,7 +770,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetPasswordHint()
-  Future<void> callSetPasswordHint(
+  Future<void> setPasswordHint(
     String hint, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
@@ -786,7 +786,7 @@ class XdgUser extends DBusRemoteObject {
   }
 
   /// Invokes org.freedesktop.Accounts.User.SetAutomaticLogin()
-  Future<void> callSetAutomaticLogin(
+  Future<void> setAutomaticLogin(
     bool enabled, {
     bool noAutoStart = false,
     bool allowInteractiveAuthorization = false,
