@@ -10,6 +10,11 @@ enum FreeDesktopAccountType {
 extension _FreeDesktopUserChangedSignal on DBusPropertiesChangedSignal {
   bool get userNameChanged => changedProperties.containsKey('UserName');
   bool get realNameChanged => changedProperties.containsKey('RealName');
+  bool get accountTypeChanged => changedProperties.containsKey('AccountType');
+  bool get homeDirChanged => changedProperties.containsKey('HomeDirectory');
+  bool get shellChanged => changedProperties.containsKey('Shell');
+  bool get emailChanged => changedProperties.containsKey('Email');
+  bool get languageChanged => changedProperties.containsKey('Language');
 }
 
 class FreeDesktopUser extends DBusRemoteObject {
@@ -41,6 +46,7 @@ class FreeDesktopUser extends DBusRemoteObject {
     _realNameChangedController.add(value);
   }
 
+  // AccountType
   final _accountTypeChangedController =
       StreamController<FreeDesktopAccountType>.broadcast();
   Stream<FreeDesktopAccountType> get accountTypeChanged =>
@@ -53,11 +59,59 @@ class FreeDesktopUser extends DBusRemoteObject {
     _accountTypeChangedController.add(value);
   }
 
+  // HomeDirectory
+  final _homeDirChangedController = StreamController<String>.broadcast();
+  Stream<String> get homeDirChanged => _homeDirChangedController.stream;
+  String? _homeDir;
+  String? get homeDir => _homeDir;
+  set homeDir(String? value) {
+    if (value == null) return;
+    _homeDir = value;
+    _homeDirChangedController.add(value);
+  }
+
+  // Shell
+  final _shellChangedController = StreamController<String>.broadcast();
+  Stream<String> get shellChanged => _shellChangedController.stream;
+  String? _shell;
+  String? get shell => _shell;
+  set shell(String? value) {
+    if (value == null) return;
+    _shell = value;
+    _shellChangedController.add(value);
+  }
+
+  // Email
+  final _emailChangedController = StreamController<String>.broadcast();
+  Stream<String> get emailChanged => _emailChangedController.stream;
+  String? _email;
+  String? get email => _email;
+  set email(String? value) {
+    if (value == null) return;
+    _email = value;
+    _emailChangedController.add(value);
+  }
+
+  // Language
+  final _languageChangedController = StreamController<String>.broadcast();
+  Stream<String> get languageChanged => _languageChangedController.stream;
+  String? _language;
+  String? get language => _language;
+  set language(String? value) {
+    if (value == null) return;
+    _language = value;
+    _languageChangedController.add(value);
+  }
+
   Future<void> init() async {
     _uid = await getUid();
     _userName = await getUserName();
     _realName = await getRealName();
     _accountType = await getAccountType();
+    _homeDir = await getHomeDirectory();
+    _shell = await getShell();
+    _email = await getEmail();
+    _language = await getLanguage();
     _propertyListener ??= propertiesChanged.listen(_updateProperties);
   }
 
@@ -67,6 +121,21 @@ class FreeDesktopUser extends DBusRemoteObject {
     }
     if (signal.realNameChanged) {
       realName = await getRealName();
+    }
+    if (signal.accountTypeChanged) {
+      accountType = await getAccountType();
+    }
+    if (signal.homeDirChanged) {
+      homeDir = await getHomeDirectory();
+    }
+    if (signal.shellChanged) {
+      shell = await getShell();
+    }
+    if (signal.emailChanged) {
+      email = await getEmail();
+    }
+    if (signal.languageChanged) {
+      language = await getLanguage();
     }
   }
 
