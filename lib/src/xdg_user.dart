@@ -7,7 +7,18 @@ enum XdgAccountType {
   admin;
 }
 
-extension _XdgUserChangedSignal on DBusPropertiesChangedSignal {
+class XdgUserChangedSignal extends DBusSignal {
+  XdgUserChangedSignal(DBusSignal signal)
+      : super(
+          sender: signal.sender,
+          path: signal.path,
+          interface: signal.interface,
+          name: signal.name,
+          values: signal.values,
+        );
+}
+
+extension _XdgUserPropertiesChangedSignal on DBusPropertiesChangedSignal {
   bool get userNameChanged => changedProperties.containsKey('UserName');
   bool get realNameChanged => changedProperties.containsKey('RealName');
   bool get accountTypeChanged => changedProperties.containsKey('AccountType');
@@ -22,9 +33,17 @@ class XdgUser extends DBusRemoteObject {
     DBusClient client,
     String destination, {
     DBusObjectPath path = const DBusObjectPath.unchecked('/'),
-  }) : super(client, name: destination, path: path);
+  }) : super(client, name: destination, path: path) {
+    changed = DBusRemoteObjectSignalStream(
+      object: this,
+      interface: 'org.freedesktop.Accounts.User',
+      name: 'Changed',
+      signature: DBusSignature(''),
+    ).asBroadcastStream().map((signal) => XdgUserChangedSignal(signal));
+  }
 
   StreamSubscription<DBusPropertiesChangedSignal>? _propertyListener;
+  late final Stream<XdgUserChangedSignal> changed;
 
   Future<void> init() async {
     _uid = await getUid();
@@ -38,32 +57,33 @@ class XdgUser extends DBusRemoteObject {
     _propertyListener ??= propertiesChanged.listen(_updateProperties);
   }
 
-  Future<void> _updateProperties(DBusPropertiesChangedSignal signal) async {
+  void _updateProperties(DBusPropertiesChangedSignal signal) {
     if (signal.userNameChanged) {
-      _updateUserName(await getUserName());
+      getUserName().then(_updateUserName);
     }
     if (signal.realNameChanged) {
-      _updateRealName(await getRealName());
+      getRealName().then(_updateRealName);
     }
     if (signal.accountTypeChanged) {
-      _updateAccountType(await getAccountType());
+      getAccountType().then(_updateAccountType);
     }
     if (signal.homeDirChanged) {
-      _updateHomeDir(await getHomeDirectory());
+      getHomeDirectory().then(_updateHomeDir);
     }
     if (signal.shellChanged) {
-      _updateShell(await getShell());
+      getShell().then(_updateShell);
     }
     if (signal.emailChanged) {
-      _updateEmail(await getEmail());
+      getEmail().then(_updateEmail);
     }
     if (signal.languageChanged) {
-      _updateLanguage(await getLanguage());
+      getLanguage().then(_updateLanguage);
     }
   }
 
   Future<void> dispose() async {
     await _propertyListener?.cancel();
+    _propertyListener = null;
     await client.close();
   }
 

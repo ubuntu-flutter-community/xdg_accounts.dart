@@ -90,14 +90,6 @@ class LinuxAccountsService {
     _usersController.add(true);
   }
 
-  Future<void> changeUserName({
-    required String uid,
-    required String newUserName,
-  }) async {
-    await _xdgUsers[uid]
-        ?.setUserName(newUserName, allowInteractiveAuthorization: true);
-  }
-
   Future<String> getDaemonVersion() async => _object.getDaemonVersion();
   String? lastDaemonVersion;
   final _daemonVersionController = StreamController<String>.broadcast();
