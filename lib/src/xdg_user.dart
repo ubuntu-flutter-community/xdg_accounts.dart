@@ -18,90 +18,13 @@ extension _XdgUserChangedSignal on DBusPropertiesChangedSignal {
 }
 
 class XdgUser extends DBusRemoteObject {
+  XdgUser(
+    DBusClient client,
+    String destination, {
+    DBusObjectPath path = const DBusObjectPath.unchecked('/'),
+  }) : super(client, name: destination, path: path);
+
   StreamSubscription<DBusPropertiesChangedSignal>? _propertyListener;
-
-  // Uid - can not change ?
-  int? _uid;
-  int? get uid => _uid;
-
-  // UserName
-  final _userNameChangedController = StreamController<String>.broadcast();
-  Stream<String> get userNameChanged => _userNameChangedController.stream;
-  String? _userName;
-  String? get userName => _userName;
-  void _updateUserName(String? value) {
-    if (value == null) return;
-    _userName = value;
-    _userNameChangedController.add(value);
-  }
-
-  // RealName
-  final _realNameChangedController = StreamController<String>.broadcast();
-  Stream<String> get realNameChanged => _realNameChangedController.stream;
-  String? _realName;
-  String? get realName => _realName;
-  void _updateRealName(String? value) {
-    if (value == null) return;
-    _realName = value;
-    _realNameChangedController.add(value);
-  }
-
-  // AccountType
-  final _accountTypeChangedController =
-      StreamController<XdgAccountType>.broadcast();
-  Stream<XdgAccountType> get accountTypeChanged =>
-      _accountTypeChangedController.stream;
-  XdgAccountType? _accountType;
-  XdgAccountType? get accountType => _accountType;
-  void _updateAccountType(XdgAccountType? value) {
-    if (value == null) return;
-    _accountType = value;
-    _accountTypeChangedController.add(value);
-  }
-
-  // HomeDirectory
-  final _homeDirChangedController = StreamController<String>.broadcast();
-  Stream<String> get homeDirChanged => _homeDirChangedController.stream;
-  String? _homeDir;
-  String? get homeDir => _homeDir;
-  void _updateHomeDir(String? value) {
-    if (value == null) return;
-    _homeDir = value;
-    _homeDirChangedController.add(value);
-  }
-
-  // Shell
-  final _shellChangedController = StreamController<String>.broadcast();
-  Stream<String> get shellChanged => _shellChangedController.stream;
-  String? _shell;
-  String? get shell => _shell;
-  void _updateShell(String? value) {
-    if (value == null) return;
-    _shell = value;
-    _shellChangedController.add(value);
-  }
-
-  // Email
-  final _emailChangedController = StreamController<String>.broadcast();
-  Stream<String> get emailChanged => _emailChangedController.stream;
-  String? _email;
-  String? get email => _email;
-  void _updateEmail(String? value) {
-    if (value == null) return;
-    _email = value;
-    _emailChangedController.add(value);
-  }
-
-  // Language
-  final _languageChangedController = StreamController<String>.broadcast();
-  Stream<String> get languageChanged => _languageChangedController.stream;
-  String? _language;
-  String? get language => _language;
-  void _updateLanguage(String? value) {
-    if (value == null) return;
-    _language = value;
-    _languageChangedController.add(value);
-  }
 
   Future<void> init() async {
     _uid = await getUid();
@@ -139,16 +62,14 @@ class XdgUser extends DBusRemoteObject {
     }
   }
 
-  XdgUser(
-    DBusClient client,
-    String destination, {
-    DBusObjectPath path = const DBusObjectPath.unchecked('/'),
-  }) : super(client, name: destination, path: path);
-
   Future<void> dispose() async {
     await _propertyListener?.cancel();
     await client.close();
   }
+
+  // Uid
+  int? _uid;
+  int? get uid => _uid;
 
   /// Gets org.freedesktop.Accounts.User.Uid
   Future<int> getUid() async {
@@ -158,6 +79,17 @@ class XdgUser extends DBusRemoteObject {
       signature: DBusSignature('t'),
     );
     return value.asUint64();
+  }
+
+  // UserName
+  final _userNameChangedController = StreamController<String>.broadcast();
+  Stream<String> get userNameChanged => _userNameChangedController.stream;
+  String? _userName;
+  String? get userName => _userName;
+  void _updateUserName(String? value) {
+    if (value == null) return;
+    _userName = value;
+    _userNameChangedController.add(value);
   }
 
   /// Gets org.freedesktop.Accounts.User.UserName
@@ -170,6 +102,17 @@ class XdgUser extends DBusRemoteObject {
     return value.asString();
   }
 
+  // RealName
+  final _realNameChangedController = StreamController<String>.broadcast();
+  Stream<String> get realNameChanged => _realNameChangedController.stream;
+  String? _realName;
+  String? get realName => _realName;
+  void _updateRealName(String? value) {
+    if (value == null) return;
+    _realName = value;
+    _realNameChangedController.add(value);
+  }
+
   /// Gets org.freedesktop.Accounts.User.RealName
   Future<String> getRealName() async {
     var value = await getProperty(
@@ -178,6 +121,19 @@ class XdgUser extends DBusRemoteObject {
       signature: DBusSignature('s'),
     );
     return value.asString();
+  }
+
+  // AccountType
+  final _accountTypeChangedController =
+      StreamController<XdgAccountType>.broadcast();
+  Stream<XdgAccountType> get accountTypeChanged =>
+      _accountTypeChangedController.stream;
+  XdgAccountType? _accountType;
+  XdgAccountType? get accountType => _accountType;
+  void _updateAccountType(XdgAccountType? value) {
+    if (value == null) return;
+    _accountType = value;
+    _accountTypeChangedController.add(value);
   }
 
   /// Gets org.freedesktop.Accounts.User.AccountType
@@ -190,6 +146,17 @@ class XdgUser extends DBusRemoteObject {
     return value.asInt32() == 0 ? XdgAccountType.user : XdgAccountType.admin;
   }
 
+  // HomeDirectory
+  final _homeDirChangedController = StreamController<String>.broadcast();
+  Stream<String> get homeDirChanged => _homeDirChangedController.stream;
+  String? _homeDir;
+  String? get homeDir => _homeDir;
+  void _updateHomeDir(String? value) {
+    if (value == null) return;
+    _homeDir = value;
+    _homeDirChangedController.add(value);
+  }
+
   /// Gets org.freedesktop.Accounts.User.HomeDirectory
   Future<String> getHomeDirectory() async {
     var value = await getProperty(
@@ -198,6 +165,17 @@ class XdgUser extends DBusRemoteObject {
       signature: DBusSignature('s'),
     );
     return value.asString();
+  }
+
+  // Shell
+  final _shellChangedController = StreamController<String>.broadcast();
+  Stream<String> get shellChanged => _shellChangedController.stream;
+  String? _shell;
+  String? get shell => _shell;
+  void _updateShell(String? value) {
+    if (value == null) return;
+    _shell = value;
+    _shellChangedController.add(value);
   }
 
   /// Gets org.freedesktop.Accounts.User.Shell
@@ -210,6 +188,17 @@ class XdgUser extends DBusRemoteObject {
     return value.asString();
   }
 
+  // Email
+  final _emailChangedController = StreamController<String>.broadcast();
+  Stream<String> get emailChanged => _emailChangedController.stream;
+  String? _email;
+  String? get email => _email;
+  void _updateEmail(String? value) {
+    if (value == null) return;
+    _email = value;
+    _emailChangedController.add(value);
+  }
+
   /// Gets org.freedesktop.Accounts.User.Email
   Future<String> getEmail() async {
     var value = await getProperty(
@@ -218,6 +207,17 @@ class XdgUser extends DBusRemoteObject {
       signature: DBusSignature('s'),
     );
     return value.asString();
+  }
+
+  // Language
+  final _languageChangedController = StreamController<String>.broadcast();
+  Stream<String> get languageChanged => _languageChangedController.stream;
+  String? _language;
+  String? get language => _language;
+  void _updateLanguage(String? value) {
+    if (value == null) return;
+    _language = value;
+    _languageChangedController.add(value);
   }
 
   /// Gets org.freedesktop.Accounts.User.Language
