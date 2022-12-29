@@ -9,10 +9,15 @@ enum FreeDesktopAccountType {
 
 extension _FreeDesktopUserChangedSignal on DBusPropertiesChangedSignal {
   bool get userNameChanged => changedProperties.containsKey('UserName');
+  bool get realNameChanged => changedProperties.containsKey('RealName');
 }
 
 class FreeDesktopUser extends DBusRemoteObject {
   StreamSubscription<DBusPropertiesChangedSignal>? _propertyListener;
+
+  // Uid - can not change ?
+  int? _uid;
+  int? get uid => _uid;
 
   // UserName
   final _userNameChangedController = StreamController<String>.broadcast();
@@ -25,15 +30,43 @@ class FreeDesktopUser extends DBusRemoteObject {
     _userNameChangedController.add(value);
   }
 
+  // RealName
+  final _realNameChangedController = StreamController<String>.broadcast();
+  Stream<String> get realNameChanged => _realNameChangedController.stream;
+  String? _realName;
+  String? get realName => _realName;
+  set realName(String? value) {
+    if (value == null) return;
+    _realName = value;
+    _realNameChangedController.add(value);
+  }
+
+  final _accountTypeChangedController =
+      StreamController<FreeDesktopAccountType>.broadcast();
+  Stream<FreeDesktopAccountType> get accountTypeChanged =>
+      _accountTypeChangedController.stream;
+  FreeDesktopAccountType? _accountType;
+  FreeDesktopAccountType? get accountType => _accountType;
+  set accountType(FreeDesktopAccountType? value) {
+    if (value == null) return;
+    _accountType = value;
+    _accountTypeChangedController.add(value);
+  }
+
   Future<void> init() async {
+    _uid = await getUid();
     _userName = await getUserName();
+    _realName = await getRealName();
+    _accountType = await getAccountType();
     _propertyListener ??= propertiesChanged.listen(_updateProperties);
   }
 
   Future<void> _updateProperties(DBusPropertiesChangedSignal signal) async {
     if (signal.userNameChanged) {
-      final uN = await getUserName();
-      userName = uN;
+      userName = await getUserName();
+    }
+    if (signal.realNameChanged) {
+      realName = await getRealName();
     }
   }
 
