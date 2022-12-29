@@ -1,5 +1,5 @@
 name: xdg_accounts
-description: A dart library implementing the DBus org.freedesktop.Accounts interface.
+description: A dart library implementing the DBus interface org.freedesktop.Accounts.
 version: 0.0.1
 homepage: https://github.com/ubuntu-flutter-community/xdg_accounts
 
