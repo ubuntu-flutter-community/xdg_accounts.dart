@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:dbus/dbus.dart';
 
 enum FreeDesktopAccountType {
@@ -5,36 +7,44 @@ enum FreeDesktopAccountType {
   admin;
 }
 
-/// Signal data for org.freedesktop.Accounts.User.Changed.
-class FreeDesktopUserChanged extends DBusSignal {
-  FreeDesktopUserChanged(DBusSignal signal)
-      : super(
-          sender: signal.sender,
-          path: signal.path,
-          interface: signal.interface,
-          name: signal.name,
-          values: signal.values,
-        );
+extension _FreeDesktopUserChangedSignal on DBusPropertiesChangedSignal {
+  bool get userNameChanged => changedProperties.containsKey('UserName');
 }
 
 class FreeDesktopUser extends DBusRemoteObject {
-  /// Stream of org.freedesktop.Accounts.User.Changed signals.
-  late final Stream<FreeDesktopUserChanged> changed;
+  StreamSubscription<DBusPropertiesChangedSignal>? _propertyListener;
+
+  // UserName
+  final _userNameChangedController = StreamController<String>.broadcast();
+  Stream<String> get userNameChanged => _userNameChangedController.stream;
+  String? _userName;
+  String? get userName => _userName;
+  set userName(String? value) {
+    if (value == null) return;
+    _userName = value;
+    _userNameChangedController.add(value);
+  }
+
+  Future<void> init() async {
+    _userName = await getUserName();
+    _propertyListener ??= propertiesChanged.listen(_updateProperties);
+  }
+
+  Future<void> _updateProperties(DBusPropertiesChangedSignal signal) async {
+    if (signal.userNameChanged) {
+      final uN = await getUserName();
+      userName = uN;
+    }
+  }
 
   FreeDesktopUser(
     DBusClient client,
     String destination, {
     DBusObjectPath path = const DBusObjectPath.unchecked('/'),
-  }) : super(client, name: destination, path: path) {
-    changed = DBusRemoteObjectSignalStream(
-      object: this,
-      interface: 'org.freedesktop.Accounts.User',
-      name: 'Changed',
-      signature: DBusSignature(''),
-    ).asBroadcastStream().map((signal) => FreeDesktopUserChanged(signal));
-  }
+  }) : super(client, name: destination, path: path);
 
   Future<void> dispose() async {
+    await _propertyListener?.cancel();
     await client.close();
   }
 

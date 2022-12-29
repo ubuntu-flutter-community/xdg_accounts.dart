@@ -11,21 +11,20 @@ Future<void> main() async {
 
   await printAllUsers(service.freeDesktopUsers);
 
-  List<StreamSubscription<FreeDesktopUserChanged>> subs = [];
+  List<StreamSubscription<String>> userNameSubs = [];
 
+  // Process properties in stream subs
   for (var fu in service.freeDesktopUsers) {
-    final sub = fu.changed.listen((event) async {
-      // Process properties
-      print(fu.name);
+    final sub = fu.userNameChanged.listen((userName) async {
+      print('USERNAME CHANGED: $userName');
     });
-    subs.add(sub);
+    userNameSubs.add(sub);
   }
 
-  // Change to an existing uid
-  // await service.changeUserName(uid: '1001', newUserName: 'test');
-  // await printAllUsers(service.freeDesktopUsers);
+  // Change to an existing uid - DANGER!!!
+  // await service.changeUserName(uid: '1001', newUserName: 'willy');
 
-  for (var sub in subs) {
+  for (var sub in userNameSubs) {
     await sub.cancel();
   }
   await service.dispose();

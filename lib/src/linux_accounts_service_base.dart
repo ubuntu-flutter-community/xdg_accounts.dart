@@ -31,7 +31,10 @@ class LinuxAccountsService {
 
   Future<void> init() async {
     await _initDaemonVersion();
+
     await _initUserPaths();
+    await _initFreeDesktopUsers();
+
     await _initAutomaticLoginUsers();
     await _initHasNoUsers();
     await _initHasMultipleUsers();
@@ -72,6 +75,12 @@ class LinuxAccountsService {
     _userPaths = await _object.callListCachedUsers();
     if (_userPaths != null) {
       _putNewUsers(_userPaths!);
+    }
+  }
+
+  Future<void> _initFreeDesktopUsers() async {
+    for (var fu in freeDesktopUsers) {
+      await fu.init();
     }
   }
 
