@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:dbus/dbus.dart';
-import 'package:linux_accounts_service/src/xdg_user.dart';
+import 'package:xdg_accounts/src/xdg_user.dart';
 
 const _kAccountsInterface = 'org.freedesktop.Accounts';
 const _kAccountsPath = '/org/freedesktop/Accounts';

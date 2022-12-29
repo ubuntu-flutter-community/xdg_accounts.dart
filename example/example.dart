@@ -2,8 +2,8 @@
 
 import 'dart:async';
 
-import 'package:linux_accounts_service/xdg_accounts.dart';
-import 'package:linux_accounts_service/src/xdg_user.dart';
+import 'package:xdg_accounts/src/xdg_user.dart';
+import 'package:xdg_accounts/xdg_accounts.dart';
 
 Future<void> main() async {
   final service = XdgAccounts();
@@ -28,7 +28,7 @@ Future<void> main() async {
   }
 
   // DANGER DANGER - do not uncomment if you don't know what this does !!!
-  // await myUser?.setUserName('thankyoujp', allowInteractiveAuthorization: true);
+  // await myUser?.setUserName('jochen', allowInteractiveAuthorization: true);
 
   await Future.delayed(Duration(seconds: 20));
 
