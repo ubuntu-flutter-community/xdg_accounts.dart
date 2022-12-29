@@ -1,7 +1,7 @@
 import 'dart:async';
 
 import 'package:dbus/dbus.dart';
-import 'package:linux_accounts_service/src/freedesktop_user.dart';
+import 'package:linux_accounts_service/src/xdg_user.dart';
 
 const _kAccountsInterface = 'org.freedesktop.Accounts';
 const _kAccountsPath = '/org/freedesktop/Accounts';
@@ -12,10 +12,9 @@ class LinuxAccountsService {
   final DBusRemoteObject _object;
   StreamSubscription<DBusPropertiesChangedSignal>? _propertyListener;
 
-  /// User IDs mapped to the [FreeDesktopUser]
-  final Map<String, FreeDesktopUser> _freeDesktopUsers = {};
-  List<FreeDesktopUser> get freeDesktopUsers =>
-      _freeDesktopUsers.entries.map((e) => e.value).toList();
+  /// User IDs mapped to the [XdgUser]
+  final Map<String, XdgUser> _xdgUsers = {};
+  List<XdgUser> get xdgUsers => _xdgUsers.entries.map((e) => e.value).toList();
 
   static DBusRemoteObject _createObject() => DBusRemoteObject(
         DBusClient.system(),
@@ -23,7 +22,7 @@ class LinuxAccountsService {
         path: DBusObjectPath(_kAccountsPath),
       );
 
-  static FreeDesktopUser _createUserObject(String path) => FreeDesktopUser(
+  static XdgUser _createUserObject(String path) => XdgUser(
         DBusClient.system(),
         _kAccountsInterface,
         path: DBusObjectPath(path),
@@ -42,8 +41,8 @@ class LinuxAccountsService {
   }
 
   Future<void> dispose() async {
-    for (var fu in _freeDesktopUsers.entries) {
-      await fu.value.dispose();
+    for (var u in _xdgUsers.entries) {
+      await u.value.dispose();
     }
     await _propertyListener?.cancel();
     await _object.client.close();
@@ -79,8 +78,8 @@ class LinuxAccountsService {
   }
 
   Future<void> _initFreeDesktopUsers() async {
-    for (var fu in freeDesktopUsers) {
-      await fu.init();
+    for (var u in xdgUsers) {
+      await u.init();
     }
   }
 
@@ -95,7 +94,7 @@ class LinuxAccountsService {
     required String uid,
     required String newUserName,
   }) async {
-    await _freeDesktopUsers[uid]
+    await _xdgUsers[uid]
         ?.callSetUserName(newUserName, allowInteractiveAuthorization: true);
   }
 
@@ -173,7 +172,7 @@ class LinuxAccountsService {
   // Helper methods
   void _putNewUsers(List<String> userPaths) {
     for (var path in userPaths) {
-      _freeDesktopUsers.putIfAbsent(
+      _xdgUsers.putIfAbsent(
         _userIdFromPath(path),
         () => _createUserObject(path),
       );
@@ -181,18 +180,18 @@ class LinuxAccountsService {
   }
 
   void _removeOutdatedUsers(List<String> userPaths) {
-    if (userPaths.length < _freeDesktopUsers.length) {
+    if (userPaths.length < _xdgUsers.length) {
       final outDatedUsers = userPaths;
-      for (var fu in _freeDesktopUsers.entries) {
+      for (var u in _xdgUsers.entries) {
         for (var user in userPaths) {
-          if (fu.key == _userIdFromPath(user)) {
+          if (u.key == _userIdFromPath(user)) {
             outDatedUsers.remove(user);
             break;
           }
         }
       }
       for (var oU in outDatedUsers) {
-        _freeDesktopUsers.remove(_userIdFromPath(oU));
+        _xdgUsers.remove(_userIdFromPath(oU));
       }
     }
   }

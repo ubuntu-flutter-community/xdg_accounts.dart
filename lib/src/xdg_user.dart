@@ -2,12 +2,12 @@ import 'dart:async';
 
 import 'package:dbus/dbus.dart';
 
-enum FreeDesktopAccountType {
+enum XdgAccountType {
   user,
   admin;
 }
 
-extension _FreeDesktopUserChangedSignal on DBusPropertiesChangedSignal {
+extension _XdgUserChangedSignal on DBusPropertiesChangedSignal {
   bool get userNameChanged => changedProperties.containsKey('UserName');
   bool get realNameChanged => changedProperties.containsKey('RealName');
   bool get accountTypeChanged => changedProperties.containsKey('AccountType');
@@ -17,7 +17,7 @@ extension _FreeDesktopUserChangedSignal on DBusPropertiesChangedSignal {
   bool get languageChanged => changedProperties.containsKey('Language');
 }
 
-class FreeDesktopUser extends DBusRemoteObject {
+class XdgUser extends DBusRemoteObject {
   StreamSubscription<DBusPropertiesChangedSignal>? _propertyListener;
 
   // Uid - can not change ?
@@ -48,12 +48,12 @@ class FreeDesktopUser extends DBusRemoteObject {
 
   // AccountType
   final _accountTypeChangedController =
-      StreamController<FreeDesktopAccountType>.broadcast();
-  Stream<FreeDesktopAccountType> get accountTypeChanged =>
+      StreamController<XdgAccountType>.broadcast();
+  Stream<XdgAccountType> get accountTypeChanged =>
       _accountTypeChangedController.stream;
-  FreeDesktopAccountType? _accountType;
-  FreeDesktopAccountType? get accountType => _accountType;
-  set accountType(FreeDesktopAccountType? value) {
+  XdgAccountType? _accountType;
+  XdgAccountType? get accountType => _accountType;
+  set accountType(XdgAccountType? value) {
     if (value == null) return;
     _accountType = value;
     _accountTypeChangedController.add(value);
@@ -139,7 +139,7 @@ class FreeDesktopUser extends DBusRemoteObject {
     }
   }
 
-  FreeDesktopUser(
+  XdgUser(
     DBusClient client,
     String destination, {
     DBusObjectPath path = const DBusObjectPath.unchecked('/'),
@@ -181,15 +181,13 @@ class FreeDesktopUser extends DBusRemoteObject {
   }
 
   /// Gets org.freedesktop.Accounts.User.AccountType
-  Future<FreeDesktopAccountType> getAccountType() async {
+  Future<XdgAccountType> getAccountType() async {
     var value = await getProperty(
       'org.freedesktop.Accounts.User',
       'AccountType',
       signature: DBusSignature('i'),
     );
-    return value.asInt32() == 0
-        ? FreeDesktopAccountType.user
-        : FreeDesktopAccountType.admin;
+    return value.asInt32() == 0 ? XdgAccountType.user : XdgAccountType.admin;
   }
 
   /// Gets org.freedesktop.Accounts.User.HomeDirectory
