@@ -28,11 +28,14 @@ Future<void> main() async {
   }
 
   // DANGER DANGER - do not uncomment if you don't know what this does !!!
-  // await myUser?.setUserName('myUser', allowInteractiveAuthorization: true);
+  // await myUser?.setUserName('thankyoujp', allowInteractiveAuthorization: true);
+
+  await Future.delayed(Duration(seconds: 20));
 
   for (var sub in userNameSubs) {
     await sub.cancel();
   }
+
   await service.dispose();
 }
 
