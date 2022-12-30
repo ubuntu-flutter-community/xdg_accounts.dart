@@ -90,6 +90,7 @@ class XdgUser extends DBusRemoteObject {
     _xHasMessages = await getXHasMessages();
     _xKeyboardLayouts = await getXKeyboardLayouts();
     _backgroundFile = await getBackgroundFile();
+    _iconFile = await getIconFile();
     _saved = await getSaved();
     _locked = await getLocked();
     _passwordMode = await getPasswordMode();
