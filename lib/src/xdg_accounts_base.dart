@@ -152,7 +152,12 @@ class XdgAccounts {
     required String fullname,
     required int accountType,
   }) async =>
-      await _object.callCreateUser(name, fullname, accountType);
+      await _object.callCreateUser(
+        name,
+        fullname,
+        accountType,
+        allowInteractiveAuthorization: true,
+      );
 
   Future<String> cacheUser({required String name}) async =>
       _object.callCacheUser(name);
