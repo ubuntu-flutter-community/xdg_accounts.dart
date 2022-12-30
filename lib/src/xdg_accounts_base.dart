@@ -13,8 +13,9 @@ class XdgAccounts {
   StreamSubscription<DBusPropertiesChangedSignal>? _propertyListener;
 
   /// User paths mapped to the [XdgUser]
-  final Map<String, XdgUser> _xdgUsers = {};
-  List<XdgUser> get xdgUsers => _xdgUsers.entries.map((e) => e.value).toList();
+  final Map<String, XdgUser> xdgUsersMap = {};
+  List<XdgUser> get xdgUsers =>
+      xdgUsersMap.entries.map((e) => e.value).toList();
 
   static DBusRemoteObject _createObject() => DBusRemoteObject(
         DBusClient.system(),
@@ -41,7 +42,7 @@ class XdgAccounts {
   }
 
   Future<void> dispose() async {
-    for (var u in _xdgUsers.entries) {
+    for (var u in xdgUsersMap.entries) {
       await u.value.dispose();
     }
     await _propertyListener?.cancel();
@@ -164,7 +165,7 @@ class XdgAccounts {
   // Helper methods
   void _putNewUsers(List<String> userPaths) {
     for (var path in userPaths) {
-      _xdgUsers.putIfAbsent(
+      xdgUsersMap.putIfAbsent(
         path,
         () => _createUserObject(path),
       );
@@ -172,9 +173,9 @@ class XdgAccounts {
   }
 
   void _removeOutdatedUsers(List<String> userPaths) {
-    if (userPaths.length < _xdgUsers.length) {
+    if (userPaths.length < xdgUsersMap.length) {
       final outDatedUsers = userPaths;
-      for (var u in _xdgUsers.entries) {
+      for (var u in xdgUsersMap.entries) {
         for (var user in userPaths) {
           if (u.key == user) {
             outDatedUsers.remove(user);
@@ -183,7 +184,7 @@ class XdgAccounts {
         }
       }
       for (var oU in outDatedUsers) {
-        _xdgUsers.remove(oU);
+        xdgUsersMap.remove(oU);
       }
     }
   }
