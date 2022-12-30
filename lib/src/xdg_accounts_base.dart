@@ -12,7 +12,7 @@ class XdgAccounts {
   final DBusRemoteObject _object;
   StreamSubscription<DBusPropertiesChangedSignal>? _propertyListener;
 
-  /// User IDs mapped to the [XdgUser]
+  /// User paths mapped to the [XdgUser]
   final Map<String, XdgUser> _xdgUsers = {};
   List<XdgUser> get xdgUsers => _xdgUsers.entries.map((e) => e.value).toList();
 
@@ -145,7 +145,7 @@ class XdgAccounts {
   }) async =>
       _object.callFindUserByName(name);
 
-  Future<void> createUser({
+  Future<String> createUser({
     required String name,
     required String fullname,
     required int accountType,
@@ -165,7 +165,7 @@ class XdgAccounts {
   void _putNewUsers(List<String> userPaths) {
     for (var path in userPaths) {
       _xdgUsers.putIfAbsent(
-        _userIdFromPath(path),
+        path,
         () => _createUserObject(path),
       );
     }
@@ -176,20 +176,17 @@ class XdgAccounts {
       final outDatedUsers = userPaths;
       for (var u in _xdgUsers.entries) {
         for (var user in userPaths) {
-          if (u.key == _userIdFromPath(user)) {
+          if (u.key == user) {
             outDatedUsers.remove(user);
             break;
           }
         }
       }
       for (var oU in outDatedUsers) {
-        _xdgUsers.remove(_userIdFromPath(oU));
+        _xdgUsers.remove(oU);
       }
     }
   }
-
-  String _userIdFromPath(String user) =>
-      user.replaceAll('$_kAccountsPath/User', '');
 }
 
 extension _AccountsRemoteObject on DBusRemoteObject {

@@ -2,7 +2,6 @@
 
 import 'dart:async';
 
-import 'package:xdg_accounts/src/xdg_user.dart';
 import 'package:xdg_accounts/xdg_accounts.dart';
 
 Future<void> main() async {
