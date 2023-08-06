@@ -148,12 +148,12 @@ class XdgAccounts {
   Future<String> findUserById({
     required int id,
   }) async =>
-      _object.callFindUserById(id);
+      await _object.callFindUserById(id);
 
   Future<String> findUserByName({
     required String name,
   }) async =>
-      _object.callFindUserByName(name);
+      await _object.callFindUserByName(name);
 
   Future<String> createUser({
     required String name,
@@ -168,10 +168,10 @@ class XdgAccounts {
       );
 
   Future<String> cacheUser({required String name}) async =>
-      _object.callCacheUser(name);
+      await _object.callCacheUser(name);
 
   Future<void> unCacheUser({required String name}) async =>
-      _object.callUncacheUser(name);
+      await _object.callUncacheUser(name);
 
   Future<void> deleteUser({
     required int id,
@@ -179,7 +179,7 @@ class XdgAccounts {
     required bool removeFiles,
   }) async {
     await _object.callUncacheUser(name, allowInteractiveAuthorization: true);
-    return _object.callDeleteUser(
+    return await _object.callDeleteUser(
       id,
       removeFiles,
       allowInteractiveAuthorization: true,
