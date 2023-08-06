@@ -166,7 +166,11 @@ class XdgAccounts {
       _object.callUncacheUser(name);
 
   Future<void> deleteUser({required int id, required bool removeFiles}) async =>
-      _object.callDeleteUser(id, removeFiles);
+      _object.callDeleteUser(
+        id,
+        removeFiles,
+        allowInteractiveAuthorization: true,
+      );
 
   // Helper methods
   void _putNewUsers(List<String> userPaths) {
