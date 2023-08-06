@@ -51,7 +51,7 @@ class XdgAccounts {
 
   void _updateProperties(DBusPropertiesChangedSignal signal) {
     if (signal.userAdded || signal.userDeleted) {
-      _object.callListCachedUsers().then(_updateUserPaths);
+      _object.callListCachedUsers().then(_updateUsers);
     }
     if (signal.daemonVersionChanged) {
       _object.getDaemonVersion().then(_updateDaemonVersion);
@@ -83,10 +83,18 @@ class XdgAccounts {
     }
   }
 
-  void _updateUserPaths(List<String> value) {
+  Future<void> _updateUsers(List<String> value) async {
     _userPaths = value;
-    _putNewUsers(value);
-    _removeOutdatedUsers(value);
+
+    for (var u in _xdgUsers.entries) {
+      await u.value.dispose();
+    }
+    _xdgUsers.clear();
+
+    await _initUserPaths();
+
+    await _initFreeDesktopUsers();
+
     _usersController.add(true);
   }
 
@@ -185,24 +193,6 @@ class XdgAccounts {
         path,
         () => _createUserObject(path),
       );
-    }
-  }
-
-  void _removeOutdatedUsers(List<String> userPaths) {
-    if (userPaths.length < _xdgUsers.length) {
-      final outDatedUsers = userPaths;
-      for (var u in _xdgUsers.entries) {
-        for (var user in userPaths) {
-          if (u.key == user) {
-            outDatedUsers.remove(user);
-            break;
-          }
-        }
-      }
-      for (var oU in outDatedUsers) {
-        _xdgUsers[oU]?.dispose();
-        _xdgUsers.remove(oU);
-      }
     }
   }
 }
