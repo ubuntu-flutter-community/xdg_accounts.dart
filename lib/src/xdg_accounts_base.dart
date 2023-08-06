@@ -194,6 +194,7 @@ class XdgAccounts {
         }
       }
       for (var oU in outDatedUsers) {
+        _xdgUsers[oU]?.dispose();
         _xdgUsers.remove(oU);
       }
     }
